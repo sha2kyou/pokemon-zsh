@@ -1,5 +1,5 @@
 # pokemon-zsh-script
-宝可梦zsh脚本
+宝可梦zsh脚本，给你的 `cd` 和 `ls` 命令带来点小惊喜。
 
 ## 配置步骤
 
