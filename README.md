@@ -18,6 +18,6 @@ source /xxx/pokemon-zsh-script.zsh
 5. 尝试执行 `ls` 命令，配置正确的话应该会显示出当前目录对应的宝可梦
 
 
-## 示例
-配置完成后的 `ls` 展示：
+## 完成示例
+
 ![示例1](image.png)
