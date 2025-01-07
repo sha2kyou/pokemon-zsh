@@ -15,7 +15,7 @@ function cd() {
   fi
 }
 
-## 跳出目录名映射显示宝可梦
+## 跳出目录名映射宝可梦
 function show_pokemon_by_dir() {
   local text lines num current_dir hash hash_int range mapped_value selected_pokemon
 
