@@ -13,7 +13,7 @@
 source /xxx/pokemon-zsh-script.zsh
 ```
 
-4. 运行 `source ~/.zshrc` 命令使配置生效
+4. 重启终端或在当前终端运行 `source ~/.zshrc` 命令使配置生效
 
 5. 尝试执行 `ls` 命令，配置正确的话应该会显示出当前目录对应的宝可梦
 
