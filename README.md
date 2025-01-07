@@ -5,7 +5,7 @@
 
 1. 根据教程配置 [pokemon-colorscripts](https://gitlab.com/phoneybadger/pokemon-colorscripts)。
 
-2. 将本脚本保存到指定位置（假设路径为 `/xxx/pokemon-zsh-script.zsh`）。
+2. 将本项目提供的脚本文件 `pokemon-zsh-script.zsh` 保存到指定位置（假设路径为 `/xxx/pokemon-zsh-script.zsh`）。
 
 3. 编辑 .zshrc 文件，添加以下内容：
 
