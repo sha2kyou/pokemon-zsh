@@ -9,14 +9,15 @@ function ls() {
 function cd() {
   builtin cd "$@"
   
-  local TRIGGER_RATE=8
-  if ((RANDOM % TRIGGER_RATE == 0)); then
+  if ((RANDOM % CD_TRIGGER_RATE == 0)); then
     pokemon 1 1
   fi
 }
 
 ## 闪光概率倒数
 SHINY_RATE=128
+## cd触发概率倒数
+CD_TRIGGER_RATE=8
 
 ## 根据目录显示宝可梦
 function show_pokemon_by_dir() {
