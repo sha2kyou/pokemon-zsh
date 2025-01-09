@@ -1,10 +1,11 @@
-
+## 替换ls命令，每次执行ls时，必定显示宝可梦
 function ls() {
   pokemon 15 1
   echo "----------------------------------------"
   command ls "$@"
 }
 
+## 替换cd命令，每次执行cd时，有一定概率显示宝可梦
 function cd() {
   builtin cd "$@"
   
@@ -56,6 +57,7 @@ function show_pokemon_random() {
   fi
 }
 
+## 宝可梦
 function pokemon(){
   local a=${1:-0}
   local b=${2:-1}
