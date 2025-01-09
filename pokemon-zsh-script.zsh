@@ -1,21 +1,23 @@
-## 替换ls命令
+
 function ls() {
   pokemon 15 1
   echo "----------------------------------------"
   command ls "$@"
 }
-## 替换cd命令
+
 function cd() {
   builtin cd "$@"
   
-  # 宝可梦跳出概率
   local TRIGGER_RATE=8
   if ((RANDOM % TRIGGER_RATE == 0)); then
-    pokemon 5 5
+    pokemon 1 1
   fi
 }
 
-## 跳出目录名映射宝可梦
+## 闪光概率倒数
+SHINY_RATE=128
+
+## 根据目录显示宝可梦
 function show_pokemon_by_dir() {
   local text lines num current_dir hash hash_int range mapped_value selected_pokemon
 
@@ -34,8 +36,6 @@ function show_pokemon_by_dir() {
 
   selected_pokemon=${lines[$((mapped_value-1))]}
 
-  # echo "----------------------------------------"
-  local SHINY_RATE=32
   if ((RANDOM % SHINY_RATE == 0)); then
     echo "✨野生的闪光宝可梦出现了！✨"
     pokemon-colorscripts -n "$selected_pokemon" --no-title -r -s
@@ -45,10 +45,8 @@ function show_pokemon_by_dir() {
   fi
 }
 
-## 跳出随机宝可梦
+## 随机宝可梦
 function show_pokemon_random() {
-  # echo "----------------------------------------"
-  local SHINY_RATE=64
   if ((RANDOM % SHINY_RATE == 0)); then
     echo "✨野生的闪光宝可梦出现了！✨"
     pokemon-colorscripts -r -s --no-title
@@ -58,7 +56,6 @@ function show_pokemon_random() {
   fi
 }
 
-## 宝可梦函数，$1为目录名映射宝可梦跳出概率，$2为随机宝可梦跳出概率
 function pokemon(){
   local a=${1:-0}
   local b=${2:-1}
