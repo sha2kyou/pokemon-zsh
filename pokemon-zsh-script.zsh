@@ -17,7 +17,7 @@ function cd() {
 ## 闪光概率倒数
 SHINY_RATE=128
 ## cd触发概率倒数
-CD_TRIGGER_RATE=1
+CD_TRIGGER_RATE=6
 
 # 获取随机宝可梦并显示
 function _display_pokemon() {
