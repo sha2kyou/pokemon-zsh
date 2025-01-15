@@ -7,7 +7,7 @@ function ls() {
 
 ## 替换cd命令，每次执行cd时，有一定概率显示宝可梦
 function cd() {
-  builtin cd "$@"
+  builtin cd "$@" || return 1
   
   if ((RANDOM % CD_TRIGGER_RATE == 0)); then
     pokemon 1 1
@@ -17,7 +17,7 @@ function cd() {
 ## 闪光概率倒数
 SHINY_RATE=128
 ## cd触发概率倒数
-CD_TRIGGER_RATE=8
+CD_TRIGGER_RATE=1
 
 # 获取随机宝可梦并显示
 function _display_pokemon() {
