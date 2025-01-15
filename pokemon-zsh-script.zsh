@@ -89,6 +89,7 @@ function pokemon(){
   fi
 }
 
+## 根据英文宝可梦名称获取中文宝可梦名称
 get_cn_name_by_en_name() {
   local key="$1"
   echo "${pokemon_translations[$key]}"
