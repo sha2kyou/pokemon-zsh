@@ -19,70 +19,74 @@ SHINY_RATE=128
 ## cd触发概率倒数
 CD_TRIGGER_RATE=8
 
+# 获取随机宝可梦并显示
+function _display_pokemon() {
+  local pokemon_name=$1
+  local is_shiny=$2
+
+  local cn_pokemon_name=$(get_cn_name_by_en_name "$pokemon_name")
+
+  if [[ $is_shiny == true ]]; then
+    echo "✨野生的闪光${cn_pokemon_name}出现了！✨"
+    pokemon-colorscripts -n "$pokemon_name" --no-title -r -s
+  else
+    echo "野生的${cn_pokemon_name}出现了。"
+    pokemon-colorscripts -n "$pokemon_name" --no-title -r
+  fi
+}
+
+# 获取宝可梦列表
+function _get_pokemon_list() {
+  local pokemon_list
+  
+  # 使用缓存避免重复调用
+  if [[ -z $POKEMON_LIST_CACHE ]]; then
+    POKEMON_LIST_CACHE=$(pokemon-colorscripts -l)
+  fi
+  
+  IFS=$'\n' pokemon_list=("${(f)POKEMON_LIST_CACHE}")
+  echo "${pokemon_list[@]}"
+}
+
 ## 根据目录显示宝可梦
 function show_pokemon_by_dir() {
-  local text lines num current_dir hash hash_int range mapped_value selected_pokemon pokemon_name
-
-  text=$(pokemon-colorscripts -l)
-
-  IFS=$'\n' lines=("${(f)text}")
-
-  num=${#lines[@]}
-
+  local pokemon_list num current_dir hash selected_index pokemon_name is_shiny
+  
+  pokemon_list=($(_get_pokemon_list))
+  [[ ${#pokemon_list[@]} -eq 0 ]] && echo "Error: 无法获取宝可梦列表" && return 1
+  
   current_dir=$(pwd)
-
   hash=$(printf "%s" "$current_dir" | md5sum | awk '{print $1}')
-  hash_int=$((0x${hash:0:8}))
-  range=$((num))
-  mapped_value=$((hash_int % range + 1))
-
-  selected_pokemon=${lines[$((mapped_value-1))]}
-  pokemon_name=$(get_cn_name_by_en_name "$selected_pokemon")
-
-  if ((RANDOM % SHINY_RATE == 0)); then
-    echo "✨野生的闪光${pokemon_name}出现了！✨"
-    pokemon-colorscripts -n "$selected_pokemon" --no-title -r -s
-  else
-    echo "野生的${pokemon_name}出现了。"
-    pokemon-colorscripts -n "$selected_pokemon" --no-title -r
-  fi
+  selected_index=$(( 0x${hash:0:8} % ${#pokemon_list[@]} + 1 ))
+  
+  is_shiny=$((RANDOM % SHINY_RATE == 0))
+  
+  _display_pokemon "${pokemon_list[$((selected_index-1))]}" $is_shiny
 }
 
 ## 随机宝可梦
 function show_pokemon_random() {
-  local text lines num range mapped_value selected_pokemon pokemon_name
-
-  text=$(pokemon-colorscripts -l)
-
-  IFS=$'\n' lines=("${(f)text}")
-
-  num=${#lines[@]}
-
-  range=$((num))
-  mapped_value=$((RANDOM % range + 1))
-
-  selected_pokemon=${lines[$((mapped_value-1))]}
-  pokemon_name=$(get_cn_name_by_en_name "$selected_pokemon")
-
-  if ((RANDOM % SHINY_RATE == 0)); then
-    echo "✨野生的闪光${pokemon_name}出现了！✨"
-    pokemon-colorscripts -n "$selected_pokemon" --no-title -r -s
-  else
-    echo "野生的${pokemon_name}出现了。"
-    pokemon-colorscripts -n "$selected_pokemon" --no-title -r
-  fi
+  local pokemon_list selected_index pokemon_name is_shiny
+  
+  pokemon_list=($(_get_pokemon_list))
+  [[ ${#pokemon_list[@]} -eq 0 ]] && echo "Error: 无法获取宝可梦列表" && return 1
+  
+  selected_index=$((RANDOM % ${#pokemon_list[@]} + 1))
+  is_shiny=$((RANDOM % SHINY_RATE == 0))
+  
+  _display_pokemon "${pokemon_list[$((selected_index-1))]}" $is_shiny
 }
 
 ## 宝可梦
 function pokemon(){
-  local a=${1:-0}
-  local b=${2:-1}
+  local dir_weight=${1:-0}
+  local random_weight=${2:-1}
 
-  local total=$((a + b))
+  local total=$((dir_weight + random_weight))
 
   local random=$((RANDOM % total))
 
-  if ((random < a)); then
+  if ((random < dir_weight)); then
     show_pokemon_by_dir
   else
     show_pokemon_random
