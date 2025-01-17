@@ -19,7 +19,7 @@ SHINY_RATE=128
 ## cd触发概率倒数
 CD_TRIGGER_RATE=6
 
-# 获取随机宝可梦并显示
+# 获取指定宝可梦并显示
 function _display_pokemon() {
   local pokemon_name=$1
   local is_shiny=$2
