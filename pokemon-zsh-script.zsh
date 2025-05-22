@@ -50,18 +50,21 @@ function _get_pokemon_list() {
 
 ## 根据目录显示宝可梦
 function show_pokemon_by_dir() {
-  local pokemon_list num current_dir hash selected_index pokemon_name is_shiny
-  
+  local pokemon_list current_dir num_list selected_index is_shiny
+
   pokemon_list=($(_get_pokemon_list))
   [[ ${#pokemon_list[@]} -eq 0 ]] && echo "Error: 无法获取宝可梦列表" && return 1
-  
+
   current_dir=$(pwd)
-  hash=$(printf "%s" "$current_dir" | md5sum | awk '{print $1}')
-  selected_index=$(( 0x${hash:0:8} % ${#pokemon_list[@]} + 1 ))
-  
+  num_list=($(map_string_to_numbers "$current_dir"))
+  [[ ${#num_list[@]} -eq 0 ]] && echo "Error: 数字映射失败" && return 1
+
+  selected_index=$(( RANDOM % ${#num_list[@]} ))
+  selected_number=${num_list[$selected_index]}
+  pokemon_index=$(( selected_number % ${#pokemon_list[@]} + 1 ))
   is_shiny=$((RANDOM % SHINY_RATE == 0))
-  
-  _display_pokemon "${pokemon_list[$((selected_index-1))]}" $is_shiny
+
+  _display_pokemon "${pokemon_list[$((pokemon_index - 1))]}" $is_shiny
 }
 
 ## 随机宝可梦
@@ -71,10 +74,10 @@ function show_pokemon_random() {
   pokemon_list=($(_get_pokemon_list))
   [[ ${#pokemon_list[@]} -eq 0 ]] && echo "Error: 无法获取宝可梦列表" && return 1
   
-  selected_index=$((RANDOM % ${#pokemon_list[@]} + 1))
+  pokemon_index=$((RANDOM % ${#pokemon_list[@]} + 1))
   is_shiny=$((RANDOM % SHINY_RATE == 0))
   
-  _display_pokemon "${pokemon_list[$((selected_index-1))]}" $is_shiny
+  _display_pokemon "${pokemon_list[$((pokemon_index-1))]}" $is_shiny
 }
 
 ## 宝可梦
@@ -97,6 +100,23 @@ function pokemon(){
 get_cn_name_by_en_name() {
   local key="$1"
   echo "${pokemon_translations[$key]}"
+}
+
+## 字符串映射为数字数组
+function map_string_to_numbers() {
+  local input="$1"
+  local hash=$(echo -n "$input" | sha256sum | awk '{print $1}')
+  local count=$((3 + (16#${hash:0:2} & 3)))  # 3~5 个数字
+  local -a numbers
+
+  for ((i = 0; i < count; i++)); do
+    local offset=$((2 + i * 8))
+    [[ $((offset + 8)) -le 64 ]] || break
+    local hex_chunk=${hash:$offset:8}
+    numbers+=($((16#$hex_chunk)))
+  done
+
+  echo "${numbers[@]}"
 }
 
 ## 初始化
