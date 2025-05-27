@@ -8,7 +8,7 @@ function ls() {
 ## 替换cd命令，每次执行cd时，有一定概率显示宝可梦
 function cd() {
   builtin cd "$@" || return 1
-  
+
   if ((RANDOM % CD_TRIGGER_RATE == 0)); then
     pokemon 1 1
   fi
@@ -25,6 +25,9 @@ function _display_pokemon() {
   local is_shiny=$2
 
   local cn_pokemon_name=$(get_cn_name_by_en_name "$pokemon_name")
+  if [[ -z "$cn_pokemon_name" ]]; then
+    cn_pokemon_name="宝可梦"
+  fi
 
   if [[ $is_shiny == true ]]; then
     echo "✨野生的闪光${cn_pokemon_name}出现了！✨"
@@ -38,12 +41,12 @@ function _display_pokemon() {
 # 获取宝可梦列表
 function _get_pokemon_list() {
   local pokemon_list
-  
+
   # 使用缓存避免重复调用
   if [[ -z $POKEMON_LIST_CACHE ]]; then
     POKEMON_LIST_CACHE=$(pokemon-colorscripts -l)
   fi
-  
+
   IFS=$'\n' pokemon_list=("${(f)POKEMON_LIST_CACHE}")
   echo "${pokemon_list[@]}"
 }
@@ -70,13 +73,13 @@ function show_pokemon_by_dir() {
 ## 随机宝可梦
 function show_pokemon_random() {
   local pokemon_list selected_index pokemon_name is_shiny
-  
+
   pokemon_list=($(_get_pokemon_list))
   [[ ${#pokemon_list[@]} -eq 0 ]] && echo "Error: 无法获取宝可梦列表" && return 1
-  
+
   pokemon_index=$((RANDOM % ${#pokemon_list[@]} + 1))
   is_shiny=$((RANDOM % SHINY_RATE == 0))
-  
+
   _display_pokemon "${pokemon_list[$((pokemon_index-1))]}" $is_shiny
 }
 
