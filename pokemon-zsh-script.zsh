@@ -6,7 +6,7 @@
 # 检查核心依赖 pokemon-colorscripts 是否存在
 if ! command -v pokemon-colorscripts &> /dev/null; then
     echo "错误：核心依赖 'pokemon-colorscripts' 未找到。" >&2
-    echo "请先安装它。主页: https://github.com/robert-prna/pokemon-colorscripts" >&2
+    echo "请先安装它。主页: https://gitlab.com/phoneybadger/pokemon-colorscripts" >&2
     return 1
 fi
 
