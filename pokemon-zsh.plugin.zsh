@@ -9,6 +9,8 @@ source "${0:a:h}/pokemon-translations.zsh"
 # Global variables
 SHINY_RATE=4096  # Shiny rate is 1/4096 (same as in the games)
 CD_TRIGGER_RATE=6
+ENABLE_ANIMATION=1  # Enable animation effects (1: enabled, 0: disabled)
+ANIMATION_DURATION=1.5  # Animation duration in seconds
 
 # Check dependencies and set hash command
 # Dependencies:
@@ -37,7 +39,6 @@ _pokemon_check_dependencies() {
 function ls() {
   if _pokemon_check_dependencies; then
     pokemon 15 1
-    echo "----------------------------------------"
   fi
   command ls "$@"
 }
@@ -51,6 +52,34 @@ function cd() {
       pokemon 1 1
     fi
   fi
+}
+
+# Display shiny animation effect
+function _display_shiny_animation() {
+  local pokemon_name=$1
+  local final_color=$2
+
+  if (( ENABLE_ANIMATION == 1 )); then
+    local iterations=2  # Number of iterations for each color
+    local colors_count=${#shiny_colors[@]}
+    local sleep_duration=$(( ANIMATION_DURATION * 100 / (iterations * colors_count) ))
+    sleep_duration=0.$(printf "%02d" $sleep_duration)  # Convert to decimal format
+    local colors=(${shiny_colors[@]})  # Copy the colors array
+    
+    # Clear current line
+    echo -en "\r\033[K"
+    
+    # Blinking animation
+    for ((i=1; i<=$iterations; i++)); do
+      for color in ${colors[@]}; do
+        echo -en "\r✨ 野生的\033[${color}m\033[1m闪光${cn_pokemon_name}\033[0m出现了！✨"
+        sleep $sleep_duration
+      done
+    done
+  fi
+  
+  # Display the final text with random color
+  echo -e "\r✨ 野生的\033[${final_color}m\033[1m闪光${cn_pokemon_name}\033[0m出现了！✨"
 }
 
 # Get specified Pokémon and display
@@ -72,18 +101,22 @@ function _display_pokemon() {
 
   local shiny_flag=""
   local message=""
-  local shiny_colors=(31 32 33 34 35 36)  # 红绿黄蓝紫青
+  local shiny_colors=(31 32 33 34 35 36)  # Red, Green, Yellow, Blue, Purple, Cyan
   local random_color=${shiny_colors[$((RANDOM % ${#shiny_colors[@]} + 1))]}
 
   # Shiny
   if (( is_shiny == 1 )); then
     shiny_flag="-s"
-    message="✨ 野生的\033[${random_color}m\033[1m闪光${cn_pokemon_name}\033[0m出现了！✨"
+    _display_shiny_animation "$pokemon_name" "$random_color"  # Display shiny animation
   else
     message="野生的\033[1m${cn_pokemon_name}\033[0m出现了！"
+    echo -e "${message}"
+    # Wait based on animation configuration
+    if (( ENABLE_ANIMATION == 1 )); then
+      sleep $ANIMATION_DURATION
+    fi
   fi
 
-  echo -e "${message}"
   pokemon-colorscripts -n "$pokemon_name" --no-title -r ${shiny_flag}
   echo "----------------------------------------"
 }
@@ -194,7 +227,7 @@ function map_string_to_numbers() {
   local input="$1"
   # Use the determined hash command
   local hash=$(echo -n "$input" | $_HASH_CMD | awk '{print $1}')
-  local count=$((3 + (16#${hash:0:2} & 3)))  # 3~5 numbers
+  local count=$((3 + (16#${hash:0:2} & 3)))  # Generate 3-5 numbers
   local -a numbers
 
   for ((i = 0; i < count; i++)); do
