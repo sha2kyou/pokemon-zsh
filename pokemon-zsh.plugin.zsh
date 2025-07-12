@@ -7,10 +7,13 @@
 source "pokemon-translations.zsh"
 
 # Global variables
-SHINY_RATE=128
+SHINY_RATE=4096  # 闪光概率为1/4096
 CD_TRIGGER_RATE=6
 
-# Function to check for dependencies and set _HASH_CMD
+# 检查依赖项并设置哈希命令
+# 检查：
+# 1. pokemon-colorscripts - 用于显示宝可梦ASCII图案
+# 2. sha256sum 或 shasum - 用于目录哈希功能
 _pokemon_check_dependencies() {
   # Check for pokemon-colorscripts
   if ! command -v pokemon-colorscripts &> /dev/null; then
@@ -55,45 +58,50 @@ function _display_pokemon() {
   local pokemon_name=$1
   local is_shiny=$2
 
-  local cn_pokemon_name
-  if [[ -z "$pokemon_name" ]]; then
-    echo "Error: Pokémon name is empty. Using default '宝可梦'." >&2
-    cn_pokemon_name="宝可梦"
-  else
-    # Add debug log here
-    echo "[DEBUG] _display_pokemon: Before calling get_cn_name_by_en_name. pokemon_translations keys: ${(k)pokemon_translations}" >&2
-    echo "[DEBUG] _display_pokemon: Before calling get_cn_name_by_en_name. pokemon_translations values: ${(v)pokemon_translations}" >&2
+  # 添加参数检查
+  if [[ -z "$pokemon_name" || "$pokemon_name" == "null" ]]; then
+    echo "[ERROR] Invalid pokemon name: '$pokemon_name'" >&2
+    return 1
+  fi
 
-    cn_pokemon_name=$(get_cn_name_by_en_name "$pokemon_name")
-    if [[ -z "$cn_pokemon_name" ]]; then
-      cn_pokemon_name="宝可梦"
-    fi
+  local cn_pokemon_name
+  cn_pokemon_name=$(get_cn_name_by_en_name "$pokemon_name")
+  if [[ -z "$cn_pokemon_name" ]]; then
+    cn_pokemon_name="宝可梦"
   fi
 
   local shiny_flag=""
   local message_prefix="野生的"
   local message_suffix="出现了。"
 
-  if [[ $is_shiny == true ]]; then
+  if (( is_shiny == 1 )); then
     shiny_flag="-s"
     message_prefix="✨野生的闪光"
     message_suffix="出现了！✨"
   fi
   
-echo "${message_prefix}${cn_pokemon_name}${message_suffix}"
-pokemon-colorscripts -n "$pokemon_name" --no-title -r ${shiny_flag}
+  echo "${message_prefix}${cn_pokemon_name}${message_suffix}"
+  pokemon-colorscripts -n "$pokemon_name" --no-title -r ${shiny_flag}
 }
 
-# Get Pokémon list
+# 获取宝可梦列表
+# 返回：所有可用宝可梦的名称数组
+# 使用缓存避免重复调用 pokemon-colorscripts 命令
 function _get_pokemon_list() {
-  local pokemon_list
-
-  # Use cache to avoid repeated calls
+  # 如果缓存为空，获取列表并缓存
   if [[ -z $POKEMON_LIST_CACHE ]]; then
     POKEMON_LIST_CACHE=$(pokemon-colorscripts -l)
   fi
 
+  local pokemon_list
   IFS=$'\n' pokemon_list=("${(f)POKEMON_LIST_CACHE}")
+
+  # 检查列表是否为空
+  if [[ ${#pokemon_list[@]} -eq 0 ]]; then
+    echo "[ERROR] Failed to get pokemon list" >&2
+    return 1
+  fi
+  
   echo "${pokemon_list[@]}"
 }
 
@@ -113,23 +121,39 @@ function show_pokemon_by_dir() {
 
   selected_index=$(( RANDOM % ${#num_list[@]} ))
   selected_number=${num_list[$selected_index]}
-  pokemon_index=$(( selected_number % ${#pokemon_list[@]} + 1 ))
-  is_shiny=$((RANDOM % SHINY_RATE == 0))
+  # 修正索引计算
+  pokemon_index=$(( (selected_number % ${#pokemon_list[@]}) + 1 ))
+  # 添加边界检查
+  if (( pokemon_index < 1 || pokemon_index > ${#pokemon_list[@]} )); then
+    echo "[ERROR] Invalid pokemon index: $pokemon_index" >&2
+    return 1
+  fi
+  is_shiny=$(( (RANDOM % SHINY_RATE) == 0 ? 1 : 0 ))
 
-  _display_pokemon "${pokemon_list[$((pokemon_index - 1))]}" $is_shiny
+  _display_pokemon "${pokemon_list[$pokemon_index]}" $is_shiny
 }
 
-# Display random Pokémon
+# 显示随机宝可梦
+# 从所有可用的宝可梦中随机选择一个并显示
+# 有 1/SHINY_RATE 的概率遇到闪光宝可梦
 function show_pokemon_random() {
-  local pokemon_list selected_index pokemon_name is_shiny
+  local pokemon_list pokemon_index is_shiny
 
   pokemon_list=($(_get_pokemon_list))
   [[ ${#pokemon_list[@]} -eq 0 ]] && echo "Error: Could not get Pokémon list" && return 1
 
-  pokemon_index=$((RANDOM % ${#pokemon_list[@]} + 1))
-  is_shiny=$((RANDOM % SHINY_RATE == 0))
+  # 随机选择一个索引 (1-based)
+  pokemon_index=$((1 + RANDOM % ${#pokemon_list[@]}))
 
-  _display_pokemon "${pokemon_list[$((pokemon_index-1))]}" $is_shiny
+  # 检查索引是否有效
+  if (( pokemon_index < 1 || pokemon_index > ${#pokemon_list[@]} )); then
+    echo "[ERROR] Invalid pokemon index: $pokemon_index" >&2
+    return 1
+  fi
+
+  is_shiny=$(( (RANDOM % SHINY_RATE) == 0 ? 1 : 0 ))
+
+  _display_pokemon "${pokemon_list[$pokemon_index]}" $is_shiny
 }
 
 # Main pokemon function
