@@ -72,11 +72,13 @@ function _display_pokemon() {
 
   local shiny_flag=""
   local message=""
+  local shiny_colors=(31 32 33 34 35 36)  # 红绿黄蓝紫青
+  local random_color=${shiny_colors[$((RANDOM % ${#shiny_colors[@]} + 1))]}
 
   # Shiny
   if (( is_shiny == 1 )); then
     shiny_flag="-s"
-    message="✨ 野生的闪光\033[93m\033[1m${cn_pokemon_name}\033[0m出现了！✨"
+    message="✨ 野生的\033[${random_color}m\033[1m闪光${cn_pokemon_name}\033[0m出现了！✨"
   else
     message="野生的\033[1m${cn_pokemon_name}\033[0m出现了！"
   fi
