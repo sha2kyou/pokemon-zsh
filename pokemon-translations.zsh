@@ -1,4 +1,4 @@
-typeset -A pokemon_translations
+typeset -gA pokemon_translations
 pokemon_translations[bulbasaur]="妙蛙种子"
 pokemon_translations[ivysaur]="妙蛙草"
 pokemon_translations[venusaur]="妙蛙花"

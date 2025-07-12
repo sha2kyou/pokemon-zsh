@@ -4,7 +4,7 @@
 # It defines functions for displaying Pokémon.
 
 # Source the translations file
-source "${0:h}/pokemon-translations.zsh"
+source "pokemon-translations.zsh"
 
 # Global variables
 SHINY_RATE=128
@@ -55,9 +55,19 @@ function _display_pokemon() {
   local pokemon_name=$1
   local is_shiny=$2
 
-  local cn_pokemon_name=$(get_cn_name_by_en_name "$pokemon_name")
-  if [[ -z "$cn_pokemon_name" ]]; then
+  local cn_pokemon_name
+  if [[ -z "$pokemon_name" ]]; then
+    echo "Error: Pokémon name is empty. Using default '宝可梦'." >&2
     cn_pokemon_name="宝可梦"
+  else
+    # Add debug log here
+    echo "[DEBUG] _display_pokemon: Before calling get_cn_name_by_en_name. pokemon_translations keys: ${(k)pokemon_translations}" >&2
+    echo "[DEBUG] _display_pokemon: Before calling get_cn_name_by_en_name. pokemon_translations values: ${(v)pokemon_translations}" >&2
+
+    cn_pokemon_name=$(get_cn_name_by_en_name "$pokemon_name")
+    if [[ -z "$cn_pokemon_name" ]]; then
+      cn_pokemon_name="宝可梦"
+    fi
   fi
 
   local shiny_flag=""
