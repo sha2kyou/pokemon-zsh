@@ -4,7 +4,7 @@
 # It defines functions for displaying Pokémon.
 
 # Source the translations file
-source "pokemon-translations.zsh"
+source "${0:a:h}/pokemon-translations.zsh"
 
 # Global variables
 SHINY_RATE=4096  # Shiny rate is 1/4096 (same as in the games)
@@ -145,7 +145,7 @@ function show_pokemon_random() {
   # Randomly select an index (1-based)
   pokemon_index=$((1 + RANDOM % ${#pokemon_list[@]}))
 
-  # 检查索引是否有效
+  # Check if the index is valid
   if (( pokemon_index < 1 || pokemon_index > ${#pokemon_list[@]} )); then
     echo "[ERROR] Invalid pokemon index: $pokemon_index" >&2
     return 1
