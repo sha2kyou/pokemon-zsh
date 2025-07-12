@@ -9,7 +9,7 @@ source "${0:a:h}/pokemon-translations.zsh"
 # Global variables
 SHINY_RATE=4096  # Shiny rate is 1/4096 (same as in the games)
 CD_TRIGGER_RATE=6
-ENABLE_ANIMATION=1  # Enable animation effects (1: enabled, 0: disabled)
+ENABLE_ANIMATION=0  # Enable animation effects (1: enabled, 0: disabled)
 ANIMATION_DURATION=1.5  # Animation duration in seconds
 
 # Check dependencies and set hash command
