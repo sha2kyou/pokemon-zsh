@@ -7,13 +7,13 @@
 source "pokemon-translations.zsh"
 
 # Global variables
-SHINY_RATE=4096  # 闪光概率为1/4096
+SHINY_RATE=4096  # Shiny rate is 1/4096 (same as in the games)
 CD_TRIGGER_RATE=6
 
-# 检查依赖项并设置哈希命令
-# 检查：
-# 1. pokemon-colorscripts - 用于显示宝可梦ASCII图案
-# 2. sha256sum 或 shasum - 用于目录哈希功能
+# Check dependencies and set hash command
+# Dependencies:
+# 1. pokemon-colorscripts - for displaying Pokemon ASCII art
+# 2. sha256sum or shasum - for directory hash functionality
 _pokemon_check_dependencies() {
   # Check for pokemon-colorscripts
   if ! command -v pokemon-colorscripts &> /dev/null; then
@@ -58,7 +58,7 @@ function _display_pokemon() {
   local pokemon_name=$1
   local is_shiny=$2
 
-  # 添加参数检查
+  # Validate parameters
   if [[ -z "$pokemon_name" || "$pokemon_name" == "null" ]]; then
     echo "[ERROR] Invalid pokemon name: '$pokemon_name'" >&2
     return 1
@@ -84,11 +84,11 @@ function _display_pokemon() {
   pokemon-colorscripts -n "$pokemon_name" --no-title -r ${shiny_flag}
 }
 
-# 获取宝可梦列表
-# 返回：所有可用宝可梦的名称数组
-# 使用缓存避免重复调用 pokemon-colorscripts 命令
+# Get Pokemon list
+# Returns: Array of all available Pokemon names
+# Uses caching to avoid repeated calls to pokemon-colorscripts command
 function _get_pokemon_list() {
-  # 如果缓存为空，获取列表并缓存
+  # If cache is empty, fetch and cache the list
   if [[ -z $POKEMON_LIST_CACHE ]]; then
     POKEMON_LIST_CACHE=$(pokemon-colorscripts -l)
   fi
@@ -96,7 +96,7 @@ function _get_pokemon_list() {
   local pokemon_list
   IFS=$'\n' pokemon_list=("${(f)POKEMON_LIST_CACHE}")
 
-  # 检查列表是否为空
+  # Check if list is empty
   if [[ ${#pokemon_list[@]} -eq 0 ]]; then
     echo "[ERROR] Failed to get pokemon list" >&2
     return 1
@@ -121,9 +121,9 @@ function show_pokemon_by_dir() {
 
   selected_index=$(( RANDOM % ${#num_list[@]} ))
   selected_number=${num_list[$selected_index]}
-  # 修正索引计算
+  # Fix index calculation
   pokemon_index=$(( (selected_number % ${#pokemon_list[@]}) + 1 ))
-  # 添加边界检查
+  # Add boundary check
   if (( pokemon_index < 1 || pokemon_index > ${#pokemon_list[@]} )); then
     echo "[ERROR] Invalid pokemon index: $pokemon_index" >&2
     return 1
@@ -133,16 +133,16 @@ function show_pokemon_by_dir() {
   _display_pokemon "${pokemon_list[$pokemon_index]}" $is_shiny
 }
 
-# 显示随机宝可梦
-# 从所有可用的宝可梦中随机选择一个并显示
-# 有 1/SHINY_RATE 的概率遇到闪光宝可梦
+# Display random Pokemon
+# Randomly selects and displays a Pokemon from all available Pokemon
+# Has a 1/SHINY_RATE chance of encountering a shiny Pokemon
 function show_pokemon_random() {
   local pokemon_list pokemon_index is_shiny
 
   pokemon_list=($(_get_pokemon_list))
   [[ ${#pokemon_list[@]} -eq 0 ]] && echo "Error: Could not get Pokémon list" && return 1
 
-  # 随机选择一个索引 (1-based)
+  # Randomly select an index (1-based)
   pokemon_index=$((1 + RANDOM % ${#pokemon_list[@]}))
 
   # 检查索引是否有效
