@@ -117,8 +117,13 @@ function _display_pokemon() {
     fi
   fi
 
+  # Display Pokemon ASCII art
   pokemon-colorscripts -n "$pokemon_name" --no-title -r ${shiny_flag}
-  echo "----------------------------------------"
+  
+  # Generate separator line based on terminal width
+  local term_width=$(tput cols)
+  local separator=$(printf '%*s' "$term_width" '' | tr ' ' '-')
+  echo "$separator"
 }
 
 # Get Pokemon list
