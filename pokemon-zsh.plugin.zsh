@@ -71,22 +71,17 @@ function _display_pokemon() {
   fi
 
   local shiny_flag=""
-  local message_prefix="野生的"
-  local message_suffix="出现了！"
+  local message=""
 
   # Shiny
   if (( is_shiny == 1 )); then
     shiny_flag="-s"
-    message_prefix="✨ 野生的闪光"
-    message_suffix="出现了！✨"
+    message="✨ 野生的闪光\033[93m\033[1m${cn_pokemon_name}\033[0m出现了！✨"
+  else
+    message="野生的\033[1m${cn_pokemon_name}\033[0m出现了！"
   fi
 
-  if (( is_shiny == 1 )); then
-    echo -e "✨ 野生的\033[93m\033[1m闪光${cn_pokemon_name}\033[0m出现了！✨"
-    sleep 0.3
-  else
-    echo -e "${message_prefix}\033[1m${cn_pokemon_name}\033[0m${message_suffix}"
-  fi
+  echo -e "${message}"
   pokemon-colorscripts -n "$pokemon_name" --no-title -r ${shiny_flag}
   echo "----------------------------------------"
 }
