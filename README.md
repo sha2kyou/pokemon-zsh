@@ -2,7 +2,8 @@
 
 这是一个为你的 Zsh 终端带来宝可梦惊喜的 Oh My Zsh 插件。它会让你在执行 `ls` 和 `cd` 命令时，有机会遇到随机的宝可梦！
 
-![示例](image.png)
+<img width="283" height="229" alt="image" src="https://github.com/user-attachments/assets/c9d29bc9-806c-419b-9231-85c4de1e5210" />
+
 
 ## 功能
 
