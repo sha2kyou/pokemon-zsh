@@ -9,8 +9,6 @@ source "${0:a:h}/pokemon-translations.zsh"
 # Global variables
 SHINY_RATE=4096  # Shiny rate is 1/4096 (same as in the games)
 CD_TRIGGER_RATE=6
-ENABLE_ANIMATION=0  # Enable animation effects (1: enabled, 0: disabled)
-ANIMATION_DURATION=1.5  # Animation duration in seconds
 
 # Check dependencies and set hash command
 # Dependencies:
@@ -40,7 +38,12 @@ function ls() {
   if _pokemon_check_dependencies; then
     pokemon 15 1
   fi
-  command ls "$@"
+
+  if command -v eza >/dev/null 2>&1; then
+    command eza --icons "$@"
+  else
+    command ls "$@"
+  fi
 }
 
 # Overwrite cd command
@@ -54,33 +57,6 @@ function cd() {
   fi
 }
 
-# Display shiny animation effect
-function _display_shiny_animation() {
-  local pokemon_name=$1
-  local final_color=$2
-
-  if (( ENABLE_ANIMATION == 1 )); then
-    local iterations=2  # Number of iterations for each color
-    local colors_count=${#shiny_colors[@]}
-    local sleep_duration=$(( ANIMATION_DURATION * 100 / (iterations * colors_count) ))
-    sleep_duration=0.$(printf "%02d" $sleep_duration)  # Convert to decimal format
-    local colors=(${shiny_colors[@]})  # Copy the colors array
-    
-    # Clear current line
-    echo -en "\r\033[K"
-    
-    # Blinking animation
-    for ((i=1; i<=$iterations; i++)); do
-      for color in ${colors[@]}; do
-        echo -en "\r✨ 野生的\033[${color}m\033[1m闪光${cn_pokemon_name}\033[0m出现了！✨"
-        sleep $sleep_duration
-      done
-    done
-  fi
-  
-  # Display the final text with random color
-  echo -e "\r✨ 野生的\033[${final_color}m\033[1m闪光${cn_pokemon_name}\033[0m出现了！✨"
-}
 
 # Get specified Pokémon and display
 function _display_pokemon() {
@@ -107,14 +83,10 @@ function _display_pokemon() {
   # Shiny
   if (( is_shiny == 1 )); then
     shiny_flag="-s"
-    _display_shiny_animation "$pokemon_name" "$random_color"  # Display shiny animation
+    echo -e "✨ 野生的\033[${random_color}m\033[1m闪光${cn_pokemon_name}\033[0m出现了！✨"
   else
     message="野生的\033[1m${cn_pokemon_name}\033[0m出现了！"
     echo -e "${message}"
-    # Wait based on animation configuration
-    if (( ENABLE_ANIMATION == 1 )); then
-      sleep $ANIMATION_DURATION
-    fi
   fi
 
   # Display Pokemon ASCII art
